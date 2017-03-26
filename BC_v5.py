@@ -34,12 +34,12 @@ def generator(samples, batch_size=32):
                     filename = source_path.split('/')[-1]
                     current_path ='/home/carnd/data/IMG/'+filename
                     image = cv2.imread(current_path)
-                    #img = cv2.cvtColor(image,cv2.COLOR_RGB2HSV)
-                    #random_bright =.25+np.random.uniform()
+                    img = cv2.cvtColor(image,cv2.COLOR_RGB2HSV)
+                    random_bright =.25+np.random.uniform()
                     #print(random_bright)
-                    #img[:,:,2] = img[:,:,2]*random_bright
-                    #img = cv2.cvtColor(img,cv2.COLOR_HSV2RGB)
-                    images.append(image)
+                    img[:,:,2] = img[:,:,2]*random_bright
+                    img = cv2.cvtColor(img,cv2.COLOR_HSV2RGB)
+                    images.append(img)
                 steering_center = float(row[3])
                 # create adjusted steering measurements for the side camera images
                 correction = 0.4 # this is a parameter to tune
@@ -110,17 +110,17 @@ model = Sequential()
 model.add(Lambda(lambda x:(x /255.0) - 0.5,input_shape=(160,320,3)))
 model.add(Cropping2D(cropping=((70,25),(0,0))))
 
-#model.add(Convolution2D(24,5,5,subsample=(2,2),activation="relu"))
-#model.add(Convolution2D(36,5,5,subsample=(2,2),activation="relu"))
+model.add(Convolution2D(24,5,5,subsample=(2,2),activation="relu"))
+model.add(Convolution2D(36,5,5,subsample=(2,2),activation="relu"))
 #model.add(MaxPooling2D())#
-#model.add(Convolution2D(48,5,5,subsample=(2,2),activation="relu"))
-#model.add(Convolution2D(64,3,3,activation="relu"))
-#model.add(Convolution2D(64,3,3,activation="relu"))
+model.add(Convolution2D(48,5,5,subsample=(2,2),activation="relu"))
+model.add(Convolution2D(64,3,3,activation="relu"))
+model.add(Convolution2D(64,3,3,activation="relu"))
 
 
-model.add(Convolution2D(6,5,5,activation="relu"))
-model.add(MaxPooling2D())
-model.add(Convolution2D(6,5,5,activation="relu"))
+#model.add(Convolution2D(6,5,5,activation="relu"))
+#model.add(MaxPooling2D())
+#model.add(Convolution2D(6,5,5,activation="relu"))
 
 model.add(Flatten())
 model.add(Dense(100))
@@ -134,7 +134,7 @@ model.compile(loss='mse',optimizer='adam')
 
 
 
-history=model.fit_generator(train_generator, samples_per_epoch=len(train_samples), validation_data=validation_generator,nb_val_samples=len(validation_samples), nb_epoch=7,verbose=1)
+history=model.fit_generator(train_generator, samples_per_epoch=len(train_samples), validation_data=validation_generator,nb_val_samples=len(validation_samples), nb_epoch=10,verbose=1)
 
 
 import h5py
@@ -149,3 +149,5 @@ plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
 plt.show()
+#exit()
+
