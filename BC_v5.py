@@ -34,7 +34,7 @@ def generator(samples, batch_size=32):
                     filename = source_path.split('/')[-1]
                     current_path ='/home/carnd/data/IMG/'+filename
                     image = cv2.imread(current_path)
-                    img = cv2.cvtColor(image,cv2.COLOR_RGB2HSV)
+                    img = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
                     random_bright =.25+np.random.uniform()
                     #print(random_bright)
                     img[:,:,2] = img[:,:,2]*random_bright
@@ -134,7 +134,7 @@ model.compile(loss='mse',optimizer='adam')
 
 
 
-history=model.fit_generator(train_generator, samples_per_epoch=len(train_samples), validation_data=validation_generator,nb_val_samples=len(validation_samples), nb_epoch=10,verbose=1)
+history=model.fit_generator(train_generator, samples_per_epoch=len(train_samples), validation_data=validation_generator,nb_val_samples=len(validation_samples), nb_epoch=8,verbose=1)
 
 
 import h5py
