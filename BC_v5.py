@@ -29,66 +29,42 @@ def generator(samples, batch_size=32):
             images = []
             angles = []
             for row in batch_samples:
-                for i in range(3):
-                    source_path =line[i]
-                    filename = source_path.split('/')[-1]
-                    current_path ='/home/carnd/data/IMG/'+filename
-                    image = cv2.imread(current_path)
-                    img = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
-                    random_bright =.25+np.random.uniform()
-                    #print(random_bright)
-                    img[:,:,2] = img[:,:,2]*random_bright
-                    img = cv2.cvtColor(img,cv2.COLOR_HSV2RGB)
-                    images.append(img)
-                steering_center = float(row[3])
-                # create adjusted steering measurements for the side camera images
-                correction = 0.4 # this is a parameter to tune
-                steering_left = steering_center + correction
-                steering_right = steering_center - correction
+                if float(row[3]) > 0. or float(row[3]) < 0.:
+                    #print(row[3])
+                    for i in range(3):
+                        source_path =line[i]
+                        filename = source_path.split('/')[-1]
+                        current_path ='/home/carnd/data/IMG/'+filename
+                        image = cv2.imread(current_path)
+                        img = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
+                        random_bright =.25+np.random.uniform()
+                        #print(random_bright)
+                        img[:,:,2] = img[:,:,2]*random_bright
+                        img = cv2.cvtColor(img,cv2.COLOR_HSV2RGB)
+                        images.append(img)
+                    steering_center = float(row[3])
+                    # create adjusted steering measurements for the side camera images
+                    correction = 0.4 # this is a parameter to tune
+                    steering_left = steering_center + correction
+                    steering_right = steering_center - correction
 
-                # read in images from center, left and right cameras
-                #directory = './IMG/' # fill in the path to your training IMG directory
-                #img_center = process_image(np.asarray(Image.open(path + row[0])))
-                #img_left = process_image(np.asarray(Image.open(path + row[1])))
-                #img_right = process_image(np.asarray(Image.open(path + row[2])))
-                #name = '/home/carnd/data/IMG/'+row[0].split('/')[-1]
-                #image_c = cv2.imread(name)
-                #img_center=np.fliplr(image)
 
-                #name = '/home/carnd/data/IMG/'+row[1].split('/')[-1]
-                #image_l = cv2.imread(name)
-                #img_left=np.fliplr(image)
+                    angles.append(steering_center)
+                    angles.append(steering_left)            
+                    angles.append(steering_right)
 
-                #name = '/home/carnd/data/IMG/'+row[2].split('/')[-1]
-                #image_r = cv2.imread(name)
-                #img_right=np.fliplr(image)
-                # add images and angles to data set
-                #images.append(image_c)
-                angles.append(steering_center)
-
-                #images.append(image_l)
-                angles.append(steering_left)            
-                #images.append(image_r)
-                angles.append(steering_right)
-                #for i range(3):
-                #name = './IMG/'+batch_sample[0].split('/')[-1]
-                #image = cv2.imread(name)
-                #image_flipped=np.flipr(image)
-                #center_angle = -float(batch_sample[3])
-                #images.append(image_flipped)
-                #angles.append(center_angle)
-
-            # trim image to only see section with road
-            augmented_images,augmented_measurements=[],[]
-            for image,measurement in zip(images,angles):
-                augmented_images.append(image)
-                augmented_measurements.append(measurement)
-                augmented_images.append(cv2.flip(image,1))
-                augmented_measurements.append(measurement*-1.0)
+                # trim image to only see section with road
+                augmented_images,augmented_measurements=[],[]
+                for image,measurement in zip(images,angles):
+                    augmented_images.append(image)
+                    augmented_measurements.append(measurement)
+                    augmented_images.append(cv2.flip(image,1))
+                    augmented_measurements.append(measurement*-1.0)
         
         
             X_train = np.array(augmented_images)
             y_train = np.array(augmented_measurements)
+           
             yield sklearn.utils.shuffle(X_train, y_train)
 
 # compile and train the model using the generator function
@@ -123,6 +99,7 @@ model.add(Convolution2D(64,3,3,activation="relu"))
 #model.add(Convolution2D(6,5,5,activation="relu"))
 
 model.add(Flatten())
+#model.add(Dropout(0.5))
 model.add(Dense(100))
 model.add(Dense(50))
 model.add(Dense(10))
@@ -134,7 +111,7 @@ model.compile(loss='mse',optimizer='adam')
 
 
 
-history=model.fit_generator(train_generator, samples_per_epoch=len(train_samples), validation_data=validation_generator,nb_val_samples=len(validation_samples), nb_epoch=8,verbose=1)
+history=model.fit_generator(train_generator, samples_per_epoch=len(train_samples), validation_data=validation_generator,nb_val_samples=len(validation_samples), nb_epoch=14,verbose=1)
 
 
 import h5py
